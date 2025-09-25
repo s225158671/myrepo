@@ -1,0 +1,95 @@
+---
+title: "abc"
+output: html_document
+date: "2025-09-25"
+---
+
+```{r}
+# Download from the assignment repo
+url_counts <- "https://raw.githubusercontent.com/ghazkha/Assessment4/main/gene_expression.tsv"
+download.file(url_counts, destfile = "gene_expression.tsv", quiet = TRUE)
+
+```
+
+```{r}
+# Read table; make gene IDs the row names 
+ge <- read.table("gene_expression.tsv", header = TRUE, sep = "\t", stringsAsFactors = FALSE)
+row.names(ge) <- ge[,1]
+ge <- ge[ , -1]
+
+```
+
+```{r}
+# Show first six genes  
+head(ge, 6)
+
+```
+
+```{r}
+# Add mean across samples 
+ge$mean_expr <- rowMeans(ge)
+head(ge, 6)
+
+```
+
+```{r}
+# List the 10 genes with highest mean
+head(ge[order(-ge$mean_expr), , drop=FALSE], 10)
+
+```
+
+```{r}
+# Number of genes with mean < 10
+sum(ge$mean_expr < 10)
+
+```
+
+```{r}
+# Histogram 
+hist(ge$mean_expr, xlab="Mean expression", main="Distribution of mean counts")
+
+```
+
+```{r}
+# Q6: column names
+url_growth <- "https://raw.githubusercontent.com/ghazkha/Assessment4/main/growth_data.csv"
+download.file(url_growth, destfile = "growth_data.csv", quiet = TRUE)
+gd <- read.csv("growth_data.csv", stringsAsFactors = FALSE)   
+
+```
+
+```{r}
+# Inspect column names
+names(gd)
+
+```
+
+```{r}
+# Q7: mean & sd at start (2005) and end (2020) by site
+with(gd, tapply(Circumf_2005_cm, Site, function(x) c(mean=mean(x), sd=sd(x))))
+with(gd, tapply(Circumf_2020_cm, Site, function(x) c(mean=mean(x), sd=sd(x))))
+
+```
+
+```{r}
+# Q8: Boxplots of start vs end circumference
+boxplot(Circumf_2005_cm ~ Site, data=gd,
+        ylab="Tree circumference (cm)", main="Start (2005) by site")
+boxplot(Circumf_2020_cm ~ Site, data=gd,
+        ylab="Tree circumference (cm)", main="End (2020) by site")
+
+```
+
+```{r}
+# Q9: Mean growth over the last 10 years (2010–2020) at each site
+gd$growth_10y <- gd$Circumf_2020_cm - gd$Circumf_2010_cm
+with(gd, tapply(growth_10y, Site, mean))
+
+```
+
+```{r}
+# Q10: t-test comparing 10-year growth across sites
+t.test(growth_10y ~ Site, data=gd)
+
+```
+
